@@ -43,6 +43,8 @@
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
 
+IPCC_HandleTypeDef hipcc;
+
 SPI_HandleTypeDef hspi1;
 
 UART_HandleTypeDef huart1;
@@ -65,6 +67,7 @@ static void MX_GPIO_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_USART1_UART_Init(void);
+static void MX_IPCC_Init(void);
 void StartBiometricTask(void *argument);
 
 /* USER CODE BEGIN PFP */
@@ -101,6 +104,9 @@ int main(void)
 
   /* Configure the peripherals common clocks */
   PeriphCommonClock_Config();
+
+  /* IPCC initialisation */
+  MX_IPCC_Init();
 
   /* USER CODE BEGIN SysInit */
 
@@ -296,6 +302,32 @@ static void MX_ADC1_Init(void)
   /* USER CODE BEGIN ADC1_Init 2 */
 
   /* USER CODE END ADC1_Init 2 */
+
+}
+
+/**
+  * @brief IPCC Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_IPCC_Init(void)
+{
+
+  /* USER CODE BEGIN IPCC_Init 0 */
+
+  /* USER CODE END IPCC_Init 0 */
+
+  /* USER CODE BEGIN IPCC_Init 1 */
+
+  /* USER CODE END IPCC_Init 1 */
+  hipcc.Instance = IPCC;
+  if (HAL_IPCC_Init(&hipcc) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN IPCC_Init 2 */
+
+  /* USER CODE END IPCC_Init 2 */
 
 }
 
