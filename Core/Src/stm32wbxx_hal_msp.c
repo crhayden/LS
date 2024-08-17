@@ -69,6 +69,8 @@ void HAL_MspInit(void)
   /* USER CODE END MspInit 0 */
 
   /* System interrupt init*/
+  /* PendSV_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(PendSV_IRQn, 15, 0);
 
   /* USER CODE BEGIN MspInit 1 */
 
@@ -94,7 +96,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
   /** Initializes the peripherals clock
   */
     PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_ADC;
-    PeriphClkInitStruct.PLLSAI1.PLLN = 8;
+    PeriphClkInitStruct.PLLSAI1.PLLN = 24;
     PeriphClkInitStruct.PLLSAI1.PLLP = RCC_PLLP_DIV2;
     PeriphClkInitStruct.PLLSAI1.PLLQ = RCC_PLLQ_DIV2;
     PeriphClkInitStruct.PLLSAI1.PLLR = RCC_PLLR_DIV2;
