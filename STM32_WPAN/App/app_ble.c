@@ -28,7 +28,7 @@
 #include "tl.h"
 #include "app_ble.h"
 
-#include "stm32_seq.h"
+#include "cmsis_os.h"
 #include "shci.h"
 #include "stm32_lpm.h"
 #include "otp.h"
@@ -235,6 +235,24 @@ uint8_t a_AdvData[17] =
 
 /* USER CODE BEGIN PV */
 
+osThreadId_t TaskHCIUserEventID;
+
+const osThreadAttr_t taskHCIUserEventAttributes = {
+  .name = "taskHCIUserEvent",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 128 * 4
+};
+
+osThreadId_t taskAdvertisingCancelID;
+
+const osThreadAttr_t taskAdvertisingCancelAttributes = {
+  .name = "taskAdvertisingCancel",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 128 * 4
+};
+osSemaphoreId_t SemHCI;
+osMutexId_t MtxHciId;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -251,7 +269,8 @@ static void Connection_Interval_Update_Req(void);
 #endif /* L2CAP_REQUEST_NEW_CONN_PARAM != 0 */
 
 /* USER CODE BEGIN PFP */
-
+static void Start_TaskHCIUserEvent(void *pArg);
+static void Start_TaskAdvertisingCancelTask(void *pArg);
 /* USER CODE END PFP */
 
 /* External variables --------------------------------------------------------*/
@@ -317,7 +336,10 @@ void APP_BLE_Init(void)
   /**
    * Register the hci transport layer to handle BLE User Asynchronous Events
    */
-  UTIL_SEQ_RegTask(1<<CFG_TASK_HCI_ASYNCH_EVT_ID, UTIL_SEQ_RFU, hci_user_evt_proc);
+  //UTIL_SEQ_RegTask(1<<CFG_TASK_HCI_ASYNCH_EVT_ID, UTIL_SEQ_RFU, hci_user_evt_proc);
+  TaskHCIUserEventID = osThreadNew(Start_TaskHCIUserEvent, NULL, &taskHCIUserEventAttributes);
+
+
 
   /**
    * Starts the BLE Stack on CPU2
@@ -354,7 +376,8 @@ void APP_BLE_Init(void)
    * From here, all initialization are BLE application specific
    */
 
-  UTIL_SEQ_RegTask(1<<CFG_TASK_ADV_CANCEL_ID, UTIL_SEQ_RFU, Adv_Cancel);
+  //UTIL_SEQ_RegTask(1<<CFG_TASK_ADV_CANCEL_ID, UTIL_SEQ_RFU, Adv_Cancel);
+  taskAdvertisingCancelID = osThreadNew(Start_TaskAdvertisingCancelTask, NULL, &taskAdvertisingCancelAttributes);
 
   /* USER CODE BEGIN APP_BLE_Init_4 */
 
@@ -694,6 +717,9 @@ APP_BLE_ConnStatus_t APP_BLE_Get_Server_Connection_Status(void)
 static void Ble_Tl_Init(void)
 {
   HCI_TL_HciInitConf_t Hci_Tl_Init_Conf;
+  MtxHciId = osMutexNew( NULL );
+  SemHCI = osSemaphoreNew( 1, 0, NULL );
+
 
   Hci_Tl_Init_Conf.p_cmdbuffer = (uint8_t*)&BleCmdBuffer;
   Hci_Tl_Init_Conf.StatusNotCallBack = BLE_StatusNot;
@@ -1059,6 +1085,22 @@ const uint8_t* BleGetBdAddress(void)
  * SPECIFIC FUNCTIONS FOR CUSTOM
  *
  *************************************************************/
+static void Start_TaskHCIUserEvent(void *pArg) {
+    
+    UNUSED(pArg);
+    for(;;) {
+        osThreadFlagsWait(1, osFlagsWaitAny, osWaitForever);
+        hci_user_evt_proc( );
+    }
+}
+static void Start_TaskAdvertisingCancelTask(void *pArg) {
+    
+    UNUSED(pArg);
+    for(;;) {
+        osThreadFlagsWait(1, osFlagsWaitAny, osWaitForever);
+        Adv_Cancel( );
+    }
+}
 static void Adv_Cancel(void)
 {
   /* USER CODE BEGIN Adv_Cancel_1 */
@@ -1150,23 +1192,23 @@ static void Connection_Interval_Update_Req(void)
  *************************************************************/
 void hci_notify_asynch_evt(void* p_Data)
 {
-  UTIL_SEQ_SetTask(1 << CFG_TASK_HCI_ASYNCH_EVT_ID, CFG_SCH_PRIO_0);
-
-  return;
+    //UTIL_SEQ_SetTask(1 << CFG_TASK_HCI_ASYNCH_EVT_ID, CFG_SCH_PRIO_0);
+    osThreadFlagsSet(TaskHCIUserEventID, 1);
+    return;
 }
 
 void hci_cmd_resp_release(uint32_t Flag)
 {
-  UTIL_SEQ_SetEvt(1 << CFG_IDLEEVT_HCI_CMD_EVT_RSP_ID);
-
-  return;
+    //UTIL_SEQ_SetEvt(1 << CFG_IDLEEVT_HCI_CMD_EVT_RSP_ID);
+    osSemaphoreRelease(SemHCI);
+    return;
 }
 
 void hci_cmd_resp_wait(uint32_t Timeout)
 {
-  UTIL_SEQ_WaitEvt(1 << CFG_IDLEEVT_HCI_CMD_EVT_RSP_ID);
-
-  return;
+    //UTIL_SEQ_WaitEvt(1 << CFG_IDLEEVT_HCI_CMD_EVT_RSP_ID);
+    osSemaphoreAcquire(SemHCI, osWaitForever);
+    return;
 }
 
 static void BLE_UserEvtRx(void *p_Payload)
@@ -1191,41 +1233,21 @@ static void BLE_UserEvtRx(void *p_Payload)
 
 static void BLE_StatusNot(HCI_TL_CmdStatus_t Status)
 {
-  uint32_t task_id_list;
   switch (Status)
   {
     case HCI_TL_CmdBusy:
-      /**
-       * All tasks that may send an aci/hci commands shall be listed here
-       * This is to prevent a new command is sent while one is already pending
-       */
-      task_id_list = (1 << CFG_LAST_TASK_ID_WITH_HCICMD) - 1;
-      UTIL_SEQ_PauseTask(task_id_list);
-      /* USER CODE BEGIN HCI_TL_CmdBusy */
-
-      /* USER CODE END HCI_TL_CmdBusy */
+      osMutexAcquire( MtxHciId, osWaitForever );
       break;
 
     case HCI_TL_CmdAvailable:
-      /**
-       * All tasks that may send an aci/hci commands shall be listed here
-       * This is to prevent a new command is sent while one is already pending
-       */
-      task_id_list = (1 << CFG_LAST_TASK_ID_WITH_HCICMD) - 1;
-      UTIL_SEQ_ResumeTask(task_id_list);
-      /* USER CODE BEGIN HCI_TL_CmdAvailable */
-
-      /* USER CODE END HCI_TL_CmdAvailable */
+      osMutexRelease( MtxHciId );
       break;
 
     default:
-      /* USER CODE BEGIN Status */
-
-      /* USER CODE END Status */
       break;
   }
-
   return;
+
 }
 
 void SVCCTL_ResumeUserEventFlow(void)

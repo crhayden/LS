@@ -25,7 +25,7 @@
 #include "ble.h"
 #include "custom_app.h"
 #include "custom_stm.h"
-#include "stm32_seq.h"
+#include "cmsis_os.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */

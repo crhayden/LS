@@ -78,7 +78,7 @@ void PWR_EnterOffMode(void)
    * The systick should be disabled for the same reason than when the device enters stop mode because
    * at this time, the device may enter either OffMode or StopMode.
    */
-  HAL_SuspendTick();
+  //HAL_SuspendTick();
 
   EnterLowPower();
 
@@ -123,7 +123,7 @@ void PWR_ExitOffMode(void)
 /* USER CODE BEGIN PWR_ExitOffMode_1 */
 
 /* USER CODE END PWR_ExitOffMode_1 */
-  HAL_ResumeTick();
+  //HAL_ResumeTick();
 /* USER CODE BEGIN PWR_ExitOffMode_2 */
 
 /* USER CODE END PWR_ExitOffMode_2 */
@@ -149,7 +149,7 @@ void PWR_EnterStopMode(void)
    * However, the systick should be disabled anyway to avoid the case when it is about to expire at the same time the device enters
    * stop mode (this will abort the Stop Mode entry).
    */
-  HAL_SuspendTick();
+  //HAL_SuspendTick();
 
   /**
    * This function is called from CRITICAL SECTION
@@ -194,7 +194,7 @@ void PWR_ExitStopMode(void)
    */
   ExitLowPower();
 
-  HAL_ResumeTick();
+  //HAL_ResumeTick();
 /* USER CODE BEGIN PWR_ExitStopMode_2 */
 
 /* USER CODE END PWR_ExitStopMode_2 */
@@ -213,7 +213,7 @@ void PWR_EnterSleepMode(void)
 
 /* USER CODE END PWR_EnterSleepMode_1 */
 
-  HAL_SuspendTick();
+  //HAL_SuspendTick();
 
   /************************************************************************************
    * ENTER SLEEP MODE
@@ -245,7 +245,7 @@ void PWR_ExitSleepMode(void)
 /* USER CODE BEGIN PWR_ExitSleepMode_1 */
 
 /* USER CODE END PWR_ExitSleepMode_1 */
-  HAL_ResumeTick();
+  //HAL_ResumeTick();
 /* USER CODE BEGIN PWR_ExitSleepMode_2 */
 
 /* USER CODE END PWR_ExitSleepMode_2 */
