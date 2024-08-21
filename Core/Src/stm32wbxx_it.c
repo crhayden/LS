@@ -60,11 +60,11 @@
 /* External variables --------------------------------------------------------*/
 extern IPCC_HandleTypeDef hipcc;
 extern RTC_HandleTypeDef hrtc;
-extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim17;
-
+extern TIM_HandleTypeDef htim1;
 
 /* USER CODE BEGIN EV */
+extern TIM_HandleTypeDef htim17;
 
 /* USER CODE END EV */
 
@@ -195,6 +195,20 @@ void TIM1_UP_TIM16_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles TIM1 trigger and commutation interrupts and TIM17 global interrupt.
+  */
+void TIM1_TRG_COM_TIM17_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM1_TRG_COM_TIM17_IRQn 0 */
+
+  /* USER CODE END TIM1_TRG_COM_TIM17_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim17);
+  /* USER CODE BEGIN TIM1_TRG_COM_TIM17_IRQn 1 */
+
+  /* USER CODE END TIM1_TRG_COM_TIM17_IRQn 1 */
+}
+
+/**
   * @brief This function handles IPCC RX occupied interrupt.
   */
 void IPCC_C1_RX_IRQHandler(void)
@@ -237,16 +251,5 @@ void HSEM_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
-
-//void TIM1_TRG_COM_TIM17_IRQHandler(void)
-//{
-//  /* USER CODE BEGIN TIM1_TRG_COM_TIM17_IRQn 0 */
-//
-//  /* USER CODE END TIM1_TRG_COM_TIM17_IRQn 0 */
-//  HAL_TIM_IRQHandler(&htim17);
-//  /* USER CODE BEGIN TIM1_TRG_COM_TIM17_IRQn 1 */
-//
-//  /* USER CODE END TIM1_TRG_COM_TIM17_IRQn 1 */
-//}
 
 /* USER CODE END 1 */

@@ -337,7 +337,7 @@ void APP_BLE_Init(void)
    * Register the hci transport layer to handle BLE User Asynchronous Events
    */
   //UTIL_SEQ_RegTask(1<<CFG_TASK_HCI_ASYNCH_EVT_ID, UTIL_SEQ_RFU, hci_user_evt_proc);
-  TaskHCIUserEventID = osThreadNew(Start_TaskHCIUserEvent, NULL, &taskHCIUserEventAttributes);
+  //TaskHCIUserEventID = osThreadNew(Start_TaskHCIUserEvent, NULL, &taskHCIUserEventAttributes);
 
 
 
