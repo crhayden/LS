@@ -77,6 +77,8 @@ void Error_Handler(void);
 #define MB_SW1_GPIO_Port GPIOB
 #define MB_SW2_Pin GPIO_PIN_1
 #define MB_SW2_GPIO_Port GPIOB
+#define KEEPON_Pin GPIO_PIN_4
+#define KEEPON_GPIO_Port GPIOE
 #define MUX_CONTROL_Pin GPIO_PIN_10
 #define MUX_CONTROL_GPIO_Port GPIOA
 #define MOT_FAULT_Pin GPIO_PIN_15
