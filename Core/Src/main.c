@@ -4,6 +4,7 @@
 #include <LS_Biometric_Lite.h>
 #include <LS_Motor_DRV8823.h>
 #include <LS_Accel_MC3479.h>
+#include <LS_KeyPad.h>
 #include "main.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -111,6 +112,7 @@ int main(void)
   LS_BM_Lite_Init();
   LS_Accel_MC3479_Init();
   LS_Motor_DRV8823_Init();
+  LS_KeyPad_Init();
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* USER CODE END RTOS_THREADS */
